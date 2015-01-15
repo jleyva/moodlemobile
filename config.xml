@@ -5,10 +5,10 @@
         id        = "ch.lhemoodle.lesroches"
         versionCode = "1"
         version   = "1.0">
-    <name>mootes14</name>
+    <name>LesRoches</name>
 
     <description>
-        MoodleMoot Spain 2014 official app
+        Moodle Les Roches  Unfficial app
     </description>
 
     <author href="http://moodle.com" email="juan@moodle.com">
