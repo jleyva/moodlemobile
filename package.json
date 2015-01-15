@@ -1,8 +1,8 @@
 {
-  "name": "mootes14 for desktop",
+  "name": "lesroches for desktop",
   "main": "index.html",
   "window": {
-    "title": "mootes14 for desktop",
+    "title": "lesroches for desktop",
     "icon": "icon.png",
     "toolbar": true,
     "frame": true,
@@ -12,5 +12,5 @@
     "resizable": false
   },
   "plugin": true,
-  "description": "mootes14 for desktop"
+  "description": "lesroches for desktop"
 }
