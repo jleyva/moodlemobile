@@ -2,9 +2,9 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         xmlns:android = "http://schemas.android.com/apk/res/android"
-        id        = "com.moodle.moodlemobile"
-        versionCode = "383"
-        version   = "1.9">
+        id        = "ch.lhemoodle.lesroches"
+        versionCode = "385"
+        version   = "1.11">
     <name>Moodle Mobile</name>
 
     <description>
@@ -16,7 +16,7 @@
     </author>
 
     <gap:config-file platform="ios" parent="CFBundleShortVersionString">
-        <string>1.9</string>
+        <string>1.11</string>
     </gap:config-file>
 
     <feature name="http://api.phonegap.com/1.0/device" />
@@ -47,13 +47,25 @@
     <icon src="img/icon/android/icon-48-mdpi.png"   gap:platform="android"    gap:density="mdpi" />
     <icon src="img/icon/android/icon-72-hdpi.png"   gap:platform="android"    gap:density="hdpi" />
     <icon src="img/icon/android/icon-96-xhdpi.png"  gap:platform="android"    gap:density="xhdpi" />
+    <icon src="img/icon/android/icon-144-xxhdpi.png"  gap:platform="android"    gap:density="xxhdpi" />
+
+    <icon src="img/icon/ios/icon-small.png" gap:platform="ios" width="29" height="29" />
+    <icon src="img/icon/ios/icon-small@2x.png" gap:platform="ios" width="58" height="58" />
+    <icon src="img/icon/ios/icon-small@3x.png" gap:platform="ios" width="87" height="87" />
+
+    <icon src="img/icon/ios/icon-40.png"            gap:platform="ios"      width="40" height="40" />
+    <icon src="img/icon/ios/icon-40@2x.png"         gap:platform="ios"      width="80" height="80" />
+    <icon src="img/icon/ios/icon-60.png" gap:platform="ios" width="60" height="60" />
+    <icon src="img/icon/ios/icon-60@2x.png" gap:platform="ios" width="120" height="120" />
+    <icon src="img/icon/ios/icon-60@3x.png" gap:platform="ios" width="180" height="180" />
+
     <icon src="img/icon/ios/icon-57.png"            gap:platform="ios"        width="57" height="57" />
     <icon src="img/icon/ios/icon-72.png"            gap:platform="ios"        width="72" height="72" />
     <icon src="img/icon/ios/icon-76.png"            gap:platform="ios"        width="76" height="76" />
-    <icon src="img/icon/ios/icon-120.png"           gap:platform="ios"        width="120" height="120" />
-    <icon src="img/icon/ios/icon-152.png"           gap:platform="ios"        width="152" height="152" />
-    <icon src="img/icon/ios/icon-57-2x.png"         gap:platform="ios"        width="114" height="114" />
-    <icon src="img/icon/ios/icon-72-2x.png"         gap:platform="ios"        width="144" height="144" />
+    <icon src="img/icon/ios/icon-40@3x.png"         gap:platform="ios"        width="120" height="120" />
+    <icon src="img/icon/ios/icon-76@2x.png"         gap:platform="ios"        width="152" height="152" />
+    <icon src="img/icon/ios/icon-57@2x.png"         gap:platform="ios"        width="114" height="114" />
+    <icon src="img/icon/ios/icon-72@2x.png"         gap:platform="ios"        width="144" height="144" />
 
     <gap:splash src="img/splash/android/android_ldpi_portrait.png.png" gap:platform="android" gap:density="ldpi"/>
     <gap:splash src="img/splash/android/android_mdpi_portrait.png" gap:platform="android" gap:density="mdpi"/>
@@ -76,7 +88,7 @@
     <gap:plugin name="org.apache.cordova.media-capture" />
     <gap:plugin name="org.apache.cordova.console" />
     <gap:plugin name="org.apache.cordova.contacts" />
-    <gap:plugin name="org.apache.cordova.device" />
+    <gap:plugin name="org.apache.cordova.device" version="0.2.8"/>
     <gap:plugin name="org.apache.cordova.file" />
     <gap:plugin name="org.apache.cordova.file-transfer" />
     <gap:plugin name="org.apache.cordova.globalization" />
@@ -88,9 +100,14 @@
     <gap:plugin name="com.phonegap.plugins.pushplugin" />
     <gap:plugin name="net.tunts.webintent" />
     <gap:plugin name="nl.x-services.plugins.launchmyapp">
-        <param name="URL_SCHEME" value="moodlemobile" />
+        <param name="URL_SCHEME" value="lesroches" />
     </gap:plugin>
     <gap:plugin name="com.ionic.keyboard" version="1.0.3" />
+    <gap:plugin name="de.appplant.cordova.plugin.local-notification" version="0.7.5" />
+
+    <gap:config-file platform="android" parent="/manifest">
+         <application android:debuggable="false" />
+    </gap:config-file>
 
     <access origin="*" />
 

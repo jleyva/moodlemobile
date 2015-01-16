@@ -15,6 +15,11 @@ define(templates, function (eventsTpl, eventTpl) {
             }
         },
 
+        storage: {
+            "event": {type: "model"},
+            "eventsDisabled": {type: "collection", model: "event"}
+        },
+
         routes: [
             ["events/:days", "show_events", "showEvents"],
             ["events/show/:id", "show_event", "showEvent"]
@@ -49,12 +54,12 @@ define(templates, function (eventsTpl, eventTpl) {
 
                 d = new Date(event.timestart * 1000);
                 event.startdate = d.toLocaleDateString();
-                event.starttime = d.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});
+                event.starttime = d.toLocaleTimeString(MM.lang.current, {hour: '2-digit', minute:'2-digit'});
 
                 if (event.timeduration) {
                     d = new Date((event.timestart + event.timeduration) * 1000);
                     event.enddate = d.toLocaleDateString();
-                    event.endtime = d.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});
+                    event.endtime = d.toLocaleTimeString(MM.lang.current, {hour: '2-digit', minute:'2-digit'});
                 } else {
                     event.enddate = 0;
                     event.endtime = 0;
@@ -117,6 +122,77 @@ define(templates, function (eventsTpl, eventTpl) {
             // Adding loading icon.
             $('a[href="' + MM.plugins.events.settings.menuURL + '"]', '#panel-left').addClass('loading-row');
 
+            MM.plugins.events._getEvents(
+                days,
+                null,
+                function(r) {
+                    MM.plugins.events._getCalendarEventsSucces(r, days);
+                },
+                MM.plugins.events._getCalendarEventsFailure
+            );
+        },
+
+        /**
+         * Displays a single event information
+         *
+         * @param  {integer} eventId The index position in the original events array retrieved.
+         */
+        showEvent: function(eventId) {
+            var pageTitle = MM.lang.s("events");
+
+            if (typeof(MM.plugins.events.lastEvents[eventId]) != "undefined") {
+                var fullEvent = MM.plugins.events.lastEvents[eventId];
+                var course = MM.db.get("courses", MM.config.current_site.id + "-" + fullEvent.courseid);
+                if (course) {
+                    fullEvent.courseName = MM.util.formatText(course.get("fullname"));
+                }
+
+                var localEventId = MM.plugins.events._getLocalEventUniqueId(fullEvent);
+                var disabled = MM.db.get("eventsDisabled", localEventId);
+                var checked = "";
+                if (disabled) {
+                    checked = "checked";
+                }
+
+                var tpl = {
+                    "event": fullEvent,
+                    "checked": checked
+                };
+                var html = MM.tpl.render(MM.plugins.events.templates.event.html, tpl);
+
+                var title = '<div class="media"><div class="img"><img src="img/event-' + fullEvent.eventtype + '.png"></div>';
+                title += '<div class="bd">' + MM.util.formatText(fullEvent.name) + '</div></div>';
+
+                MM.panels.show('right', html, {title: title});
+
+                $("#disable-event").bind("change", function() {
+
+                    if (window.plugin && window.plugin.notification && window.plugin.notification.local) {
+                        var disable = $(this).is(':checked');
+                        if (disable) {
+                            window.plugin.notification.local.cancel(localEventId);
+                            MM.db.insert("eventsDisabled", {id: localEventId});
+                        } else {
+                            var d = new Date(fullEvent.timestart * 1000);
+
+                            window.plugin.notification.local.add(
+                                {
+                                    id: localEventId,
+                                    date: d,
+                                    title: MM.lang.s("events"),
+                                    message: fullEvent.name,
+                                    badge: 1
+                                }
+                            );
+                            MM.db.remove("eventsDisabled", localEventId);
+                        }
+                    }
+                });
+            }
+        },
+
+        _getEvents: function(days, settings, successCallback, errorCallback) {
+            settings = settings || null;
             // The core_calendar_get_calendar_events needs all the current user courses and groups.
             var params = {
                 "options[userevents]": 1,
@@ -138,33 +214,71 @@ define(templates, function (eventsTpl, eventTpl) {
             MM.moodleWSCall(wsFunction,
                 params,
                 function(r) {
-                    MM.plugins.events._getCalendarEventsSucces(r, days)
+                    successCallback(r);
                 },
-                null,
-                MM.plugins.events._getCalendarEventsFailure
-                );
+                settings,
+                errorCallback
+            );
         },
 
         /**
-         * Displays a single event information
-         *
-         * @param  {integer} eventId The index position in the original events array retrieved.
+         * We create an event Id, note that we try to make this id unique between sites but colissions may exists.
+         * It must be an integer convertible value (Android limitation).
+         * @param  {object} event An event object
+         * @return {string}       A string convertible to number
          */
-        showEvent: function(eventId) {
-            var pageTitle = MM.lang.s("events");
+        _getLocalEventUniqueId: function(event) {
+            var siteCode = MM.config.current_site.id.charCodeAt(0) + "";
+            siteCode += "" + MM.config.current_site.id.charCodeAt(1);
+            siteCode += "" + MM.config.current_site.id.charCodeAt(2);
+            siteCode += "" + MM.config.current_site.id.charCodeAt(3);
 
-            if (typeof(MM.plugins.events.lastEvents[eventId]) != "undefined") {
-                var fullEvent = MM.plugins.events.lastEvents[eventId];
-                var course = MM.db.get("courses", MM.config.current_site.id + "-" + fullEvent.courseid);
-                if (course) {
-                    fullEvent.courseName = MM.util.formatText(course.get("fullname"));
-                }
-                var tpl = {"event": fullEvent};
-                var html = MM.tpl.render(MM.plugins.events.templates.event.html, tpl);
-                MM.panels.show('right', html, {title: pageTitle});
-            }
+            return siteCode + "" + event.id;
         },
 
+        checkLocalNotifications: function() {
+            // Check if the plugin is loaded.
+            var enabled = MM.getConfig("event_notif_on", false);
+
+            if (!enabled) {
+                return false;
+            }
+
+            if (window.plugin && window.plugin.notification && window.plugin.notification.local) {
+                MM.plugins.events._getEvents(
+                30,
+                {
+                    getFromCache: false,
+                    saveToCache: true
+                },
+                function(events) {
+                    if (events.events) {
+                        _.each(events.events, function(event) {
+                            var eventId = MM.plugins.events._getLocalEventUniqueId(event);
+
+                            var disabled = MM.db.get("eventsDisabled", eventId);
+
+                            if (!disabled) {
+                                // We insert the event allways, if already exists it will be updated.
+                                var d = new Date(event.timestart * 1000);
+
+                                window.plugin.notification.local.add(
+                                    {
+                                        id: eventId,
+                                        date: d,
+                                        title: MM.lang.s("events"),
+                                        message: event.name,
+                                        badge: 1
+                                    }
+                                );
+                            }
+                        });
+                    }
+                },
+                function() {}
+            );
+            }
+        },
 
         templates: {
             "event": {

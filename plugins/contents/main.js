@@ -57,7 +57,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 }
                 var html = MM.tpl.render(MM.plugins.contents.templates.sections.html, tpl);
 
-                pageTitle = course.get("shortname") + " - " + MM.lang.s("contents");
+                pageTitle = course.get("shortname");
 
                 MM.panels.show("center", html, {title: pageTitle});
                 if (MM.deviceType == "tablet" && contents.length > 0) {
@@ -81,6 +81,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             if (MM.deviceType == "tablet") {
                 MM.panels.showLoading('right');
             }
+
+            var sectionName = "";
 
             var data = {
             "options[0][name]" : "",
@@ -106,6 +108,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         // This is a continue.
                         return true;
                     }
+                    sectionName = sections.name;
                     $.each(sections.modules, function(index2, content){
 
                         content.contentid = content.id;
@@ -142,7 +145,9 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                             if (c.contents) {
                                 $.each(c.contents, function (index5, filep) {
-                                    if (typeof(filep.localpath) != "undefined") {
+                                    if (typeof(filep.localpath) != "undefined" &&
+                                            typeof(sections.modules[index2].contents[index5]) != "undefined") {
+
                                         sections.modules[index2].contents[index5].localpath = filep.localpath;
                                     }
                                 });
@@ -150,7 +155,9 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                             if (!sections.modules[index2].webOnly) {
                                 if (c.contents) {
-                                    if (c.contents.length == 1) {
+                                    var extension = MM.util.getFileExtension(c.contents[0].filename);
+
+                                    if (c.contents.length == 1 || (content.modname == "resource" && extension != "html" && extension != "htm")) {
                                         var cFile = c.contents[0];
                                         downloaded = typeof(cFile.localpath) != "undefined";
                                     } else {
@@ -175,6 +182,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             for (var indexEl in c.contents) {
                                 _.each(contentElements, function(el) {
                                     if (typeof(c.contents[indexEl][el]) != "undefined" &&
+                                        typeof(content.contents[indexEl]) != "undefined" &&
                                         typeof(content.contents[indexEl][el]) != "undefined" &&
                                         c.contents[indexEl][el] != content.contents[indexEl][el]
                                         ) {
@@ -185,7 +193,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             }
 
                             // Check file additions.
-                            for (indexEl in content.contents) {
+                            for (var indexEl in content.contents) {
                                 if (typeof c.contents[indexEl] == "undefined") {
                                     updateContentInDB = true;
                                     c.contents[indexEl] = content.contents[indexEl];
@@ -282,7 +290,10 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                     course: course.toJSON() // Convert a model to a plain javascript object.
                 };
 
-                var pageTitle = course.get("shortname") + " - " + MM.lang.s("contents");
+                var pageTitle = MM.util.formatText(sectionName);
+                if (sectionId == -1) {
+                    pageTitle = MM.lang.s("showall");
+                }
 
                 var html = MM.tpl.render(MM.plugins.contents.templates.contents.html, tpl);
                 MM.panels.show('right', html, {title: pageTitle});
@@ -295,6 +306,14 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         $(this).data("section"),
                         $(this).data("content"),
                         -1);
+                });
+
+                // Show info for sections.
+                $("h3", "#panel-right").on(MM.quickClick, function(e) {
+                    var sectionId = $(this).data("sectionid");
+                    if (sectionId) {
+                        $("#section-" + sectionId).toggle();
+                    }
                 });
 
                 // Mod plugins should now that the page has been rendered.
@@ -440,7 +459,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 sectionName: sectionName
             };
 
-            var pageTitle = course.get("shortname") + " - " + MM.lang.s("contents");
+            var pageTitle = sectionName;
             var html = MM.tpl.render(MM.plugins.contents.templates.folder.html, tpl);
             MM.panels.show('right', html, {title: pageTitle});
             $(document).scrollTop(0);
@@ -507,7 +526,10 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             if (! skipFiles) {
                 var file = content.contents[index];
 
-                var fileParams = ["author", "license", "timecreated", "timemodified", "filesize", "localpath", "downloadtime"];
+                var fileParams = ["author", "license", "timecreated", "timemodified", "filesize", "downloadtime"];
+                if (MM.debugging) {
+                    fileParams.push("localpath");
+                }
                 for (var el in fileParams) {
                     var param = fileParams[el];
                     if (typeof(file[param]) != "undefined" && file[param]) {
