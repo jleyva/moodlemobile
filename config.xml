@@ -2,17 +2,17 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         xmlns:android = "http://schemas.android.com/apk/res/android"
-        id        = "com.moodle.moodlemobile"
-        versionCode = "389"
-        version   = "1.15">
-    <name>Moodle Mobile</name>
+        id        = "net.moodlemoot.mootes14"
+        versionCode = "1"
+        version   = "1.0">
+    <name>College App</name>
 
     <description>
-        Moodle Mobile official app
+        Android Application for College!
     </description>
 
     <author href="http://moodle.com" email="juan@moodle.com">
-        Juan Leyva
+        Devendra Rathod
     </author>
 
     <gap:config-file platform="ios" parent="CFBundleShortVersionString">
@@ -88,7 +88,7 @@
     <gap:plugin name="com.phonegap.plugins.pushplugin" />
     <gap:plugin name="net.tunts.webintent" />
     <gap:plugin name="nl.x-services.plugins.launchmyapp">
-        <param name="URL_SCHEME" value="moodlemobile" />
+        <param name="URL_SCHEME" value="mootes14" />
     </gap:plugin>
     <gap:plugin name="com.ionic.keyboard" version="1.0.3" />
     <gap:plugin name="de.appplant.cordova.plugin.local-notification" version="0.7.5" />
