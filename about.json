@@ -6,6 +6,11 @@
 },
 "credits": [
 {
+	    "fullname": "Paulin Tchonin",
+	    "contribution": "Customization",
+	    "company": "ApplebyItalia"
+},
+{
     "fullname": "Juan Leyva",
     "contribution": "Main developer",
     "company": "CV&A Consulting"
